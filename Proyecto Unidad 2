@@ -1,0 +1,233 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>  
+#include <random>
+
+using namespace std;
+
+// Genera números aleatorios entre 1 y 100  
+vector<int> generateRandomVector(int length) {
+  random_device rd;
+  mt19937 gen(rd());
+  uniform_int_distribution<> dist(1, 100);
+  
+  vector<int> vec(length);
+  generate(begin(vec), end(vec), [&] { return dist(gen); });
+
+  return vec;
+}
+
+void printVector(const vector<int>& vec) {
+  for(int x : vec) {
+    cout << x << " ";  
+  }
+  cout << endl; 
+}   
+
+int bubbleSort(vector<int>& arr) {
+  int n = arr.size();
+  int iteraciones = 0;
+   
+  for(int i=0; i < n-1; i++) {
+    for(int j = 0; j < n-i-1; j++) {
+      iteraciones++;
+      if (arr[j] > arr[j+1]) 
+        swap(arr[j], arr[j+1]);   
+    }
+  }
+   
+  return iteraciones;  
+}
+
+int insertionSort(vector<int>& arr) {
+  int n = arr.size();
+  int iteraciones = 0;
+   
+  for (int i = 1; i < n; ++i) {
+    int key = arr[i];
+    int j = i - 1;
+   
+    while (j >= 0 && arr[j] > key) {
+      iteraciones++;
+      arr[j + 1] = arr[j];
+      j = j - 1; 
+    }
+    arr[j + 1] = key;
+  }
+   
+  return iteraciones;
+}
+   
+int selectionSort(vector<int>& arr) {
+  int n = arr.size();
+  int iteraciones = 0;
+   
+  for(int i = 0; i < n-1; i++) 
+  {
+    int min_idx = i;
+    for (int j = i+1; j < n; j++) {
+      iteraciones++;
+      if (arr[j] < arr[min_idx])
+        min_idx = j;
+    }
+   
+    swap(arr[min_idx], arr[i]);
+  }
+   
+  return iteraciones; 
+}
+
+int countingSort(vector<int>& arr) {
+  int max = *max_element(arr.begin(), arr.end());
+  int min = *min_element(arr.begin(), arr.end());  
+  int range = max - min + 1;
+     
+  vector<int> count(range), output(arr.size());
+  int iteraciones = 0;
+   
+  for (int i = 0; i < arr.size(); i++) {
+    iteraciones++;
+    count[arr[i] - min]++;  
+  }
+   
+  for (int i = 1; i < count.size(); i++) {
+    iteraciones++;
+    count[i] += count[i - 1];  
+  }
+   
+  for (int i = arr.size() - 1; i >= 0; i--) {
+    iteraciones++;
+    output[count[arr[i] - min] - 1] = arr[i];
+    count[arr[i] - min]--;  
+  }
+     
+  for (int i = 0; i < arr.size(); i++) {
+    iteraciones++;
+    arr[i] = output[i];   
+  }
+   
+  return iteraciones;
+}
+  
+int partition(vector<int>& arr, int low, int high) {
+  int pivot = arr[high];  
+  int i = (low - 1); 
+  int iteraciones = 0;
+
+  for (int j = low; j <= high - 1; j++) {
+    iteraciones++;
+    if (arr[j] < pivot) {
+      i++;  
+      swap(arr[i], arr[j]);
+    }
+  }
+   
+  swap(arr[i + 1], arr[high]);
+   
+  return (i + 1);
+}
+  
+void quickSort(vector<int>& arr, int low, int high, int& iteraciones) {
+  if (low < high) {
+    int pi = partition(arr, low, high);
+   
+    iteraciones++; 
+    quickSort(arr, low, pi - 1, iteraciones);  
+      
+    iteraciones++;
+    quickSort(arr, pi + 1, high, iteraciones);
+  }
+}
+ 
+void merge(vector<int>& arr, int l, int m, int r, int& iteraciones) { 
+   
+  int n1 = m - l + 1;
+  int n2 = r - m;
+   
+  vector<int> L(n1), R(n2);
+   
+  for (int i = 0; i < n1; i++)
+    L[i] = arr[l + i];
+  for (int j = 0; j < n2; j++)
+    R[j] = arr[m + 1 + j];
+   
+  int i = 0;
+  int j = 0;
+  int k = l; 
+     
+  while (i < n1 && j < n2) {
+    iteraciones++;
+    if (L[i] <= R[j]) {
+      arr[k] = L[i];
+      i++;
+    }
+    else {
+      arr[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+   
+  while (i < n1) { 
+    iteraciones++;
+    arr[k] = L[i];
+    i++;
+    k++;
+  }
+           
+  while (j < n2) {
+    iteraciones++; 
+    arr[k] = R[j];
+    j++;
+    k++;
+  }  
+}
+  
+void mergeSort(vector<int>& arr, int l, int r, int& iteraciones)  {
+  if (l < r) { 
+    int m = l + (r - l) / 2;
+   
+    mergeSort(arr, l, m, iteraciones);  
+    mergeSort(arr, m + 1, r, iteraciones);
+    
+    merge(arr, l, m, r, iteraciones); 
+  }
+}
+  
+int main() {
+  
+  int n;
+  cout << "Ingrese tamaño del arreglo: ";
+  cin >> n;
+   
+  vector<int> arr = generateRandomVector(n);
+
+  cout << "Arreglo inicial: \n";  
+  printVector(arr);
+
+  int iteracionesBubble = bubbleSort(arr);
+  cout << "Iteraciones Bubble Sort: " << iteracionesBubble << endl; 
+
+  int iteracionesInsertion = insertionSort(arr);
+  cout << "Iteraciones Insertion Sort: " << iteracionesInsertion << endl;
+   
+  int iteracionesSelection = selectionSort(arr);
+  cout << "Iteraciones Selection Sort: " << iteracionesSelection << endl;
+   
+  int iteracionesCounting = countingSort(arr);
+  cout << "Iteraciones Counting Sort: " << iteracionesCounting << endl;
+
+  int iteracionesQuick = 0;
+  quickSort(arr, 0, arr.size() - 1, iteracionesQuick);
+  cout << "Iteraciones Quicksort: " << iteracionesQuick << endl;  
+
+  int iteracionesMerge = 0;
+  mergeSort(arr, 0, arr.size() - 1, iteracionesMerge);
+  cout << "Iteraciones Merge Sort: " << iteracionesMerge << endl;
+   
+  cout << "\nVector ordenado: \n";
+  printVector(arr);
+   
+  return 0;  
+}
